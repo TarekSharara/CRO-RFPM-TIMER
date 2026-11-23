@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RFPM Final – CRO Timer</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="RFPM CRO">
+<link rel="icon" type="image/png" href="cro-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="cro-icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#f4f6f8;--panel:#ffffff;--line:#d0d7de;--text:#1f2328;--white:#0d1117;--mute:#32383f;--blue:#0550ae;--gold:#9a6700;--amber:#9a6700;--red:#cf222e;--green:#1a7f37;--orange:#bc4c00;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font-family:inherit;border:0;cursor:pointer;touch-action:manipulation}
+
+/* top bar */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:16px;color:var(--white);font-weight:800;margin-right:auto}
+.top label{font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase}
+.top input{background:#fff;color:var(--blue);border:2px solid var(--blue);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-weight:800;font-size:16px}
+.info{font-size:12.5px;color:var(--mute)} .info b{color:var(--blue);font-family:var(--mono)}
+.clock{font-family:var(--mono);font-weight:800;color:var(--white);font-size:16px}
+.tm{font-family:var(--mono);font-weight:800;font-size:13px;padding:2px 8px;border-radius:5px;background:#dafbe1;color:var(--green)}
+.tm.after{background:#ffebe9;color:var(--red)}
+.x-snd{background:#fff;color:var(--white);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px;font-weight:700}
+
+/* timer */
+.timer{display:flex;align-items:stretch;gap:10px;padding:10px 14px;background:#eaeef2;border-bottom:2px solid var(--line)}
+#tap{flex:1;border-radius:16px;background:#dafbe1;border:3px solid var(--green);color:var(--white);display:flex;align-items:center;justify-content:center;gap:18px;padding:10px;min-height:120px}
+#tap .num{font-family:var(--mono);font-weight:900;font-size:84px;line-height:1;color:#d1001f}
+#tap .lbl{font-size:15px;font-weight:700;color:var(--mute);text-align:left;line-height:1.35}
+#tap .lbl b{color:var(--white);font-size:20px;display:block}
+#tap.run{background:#fff8c5;border-color:#d4a72c}
+#tap.over{background:#ffebe9;border-color:var(--red);animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{border-color:#ffcecb}}
+.side{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:8px;width:500px;align-content:center}
+.side [data-s="20"]{grid-column:1;grid-row:2/4;font-size:40px}
+.side [data-s="10"]{grid-column:2;grid-row:2} .side [data-s="15"]{grid-column:3;grid-row:2} .side [data-s="30"]{grid-column:4;grid-row:2}
+.side [data-s="60"]{grid-column:2;grid-row:3} .side .stop{grid-column:3/5;grid-row:3}
+.side button{min-height:58px;border-radius:12px;background:#fff;color:var(--white);border:2px solid #afb8c1;font-weight:900;font-size:24px}
+.side button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.side .ph{grid-column:1/-1;font-size:12px;font-weight:800;letter-spacing:1px;color:var(--mute);text-align:center}
+.side .stop{background:#ffebe9;color:var(--red);border-color:#ffcecb}
+
+/* list */
+main{flex:1;overflow-y:auto;padding:8px 14px 30px;-webkit-overflow-scrolling:touch}
+.list{max-width:1000px;margin:0 auto}
+.sec{margin:14px 0 5px;font-size:12.5px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);display:flex;gap:10px;align-items:center}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.r{display:grid;grid-template-columns:96px 92px 1fr;gap:10px;align-items:center;padding:10px 12px;margin:4px 0;border-radius:9px;background:var(--panel);border:2px solid #c9d1d9}
+.r .clk{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--blue)}
+.r .t{font-size:16px;font-weight:900;color:var(--orange);font-family:var(--mono)}
+.r .c{font-size:20px;font-weight:800;color:#000;line-height:1.25}
+.r .n{font-size:13.5px;color:#24292f;font-weight:600;margin-top:2px}
+.r.ann{background:#ddf4ff;border-color:#b6e3ff} .r.ann .c{color:#0a3069;font-weight:800;font-size:17px}
+.r.hit{background:#dafbe1;border-color:#aceebb} .r.hit .c{color:#116329}
+.r.note{background:#fff1e5;border-color:#ffd8b5} .r.note .c{color:#7a2e00;font-size:17px}
+.r.tie{background:#fff8c5;border-color:#eac54f} .r.tie .c{color:#4d2d00}
+.r.past{border-left:7px solid var(--green)} .r.past .clk::before{content:"✓ ";color:var(--green)}
+.r.now{border-color:#d4a72c;background:#fff8c5;box-shadow:0 0 0 3px rgba(212,167,44,.35);opacity:1}
+.sec.tie{color:#7d4e00}
+
+@media (max-width:620px){
+  .top{padding:6px 10px} .top h1{width:100%;font-size:15px}
+  .timer{padding:8px;flex-direction:column} #tap{min-height:96px;gap:12px} #tap .num{font-size:60px} #tap .lbl{font-size:13px} #tap .lbl b{font-size:17px}
+  .hint{display:none} .r.past .clk::before{content:none} .side{width:100%;gap:6px} .side button{font-size:20px;min-height:52px} .side [data-s="20"]{font-size:34px}
+  main{padding:6px 8px 24px}
+  .r{grid-template-columns:84px 1fr;grid-template-areas:"clk c" "t c";row-gap:2px;padding:8px 10px}
+  .r .clk{grid-area:clk;font-size:14px} .r .t{grid-area:t;font-size:14px} .r .c{grid-area:c;font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>25m Rapid Fire Pistol Men – Final · CRO</h1>
+  <span><label for="st">Start</label> <input type="time" id="st" value="14:00"></span>
+  <span class="info">Report <b id="iRep">13:30</b> · Equipment <b id="iEq">13:40</b></span>
+  <span><span class="clock" id="clk">--:--:--</span> <span class="tm" id="tm">T −--:--</span></span>
+</div>
+
+<div class="timer">
+  <button id="tap" onclick="tap()">
+    <span class="num" id="num">20</span>
+    <span class="lbl" id="lbl"><b>TAP at READY</b>beeps for ATTENTION</span>
+  </button>
+  <div class="side"><div class="ph">PRESET TIME</div>
+    <button data-s="10">10 s</button>
+    <button data-s="15">15 s</button>
+    <button data-s="20" class="on">20 s</button>
+    <button data-s="30">30 s</button>
+    <button data-s="60">1 min</button>
+    <button class="stop" onclick="stopT()">STOP</button>
+  </div>
+</div>
+
+<main id="main"><div class="list" id="list"></div></main>
+
+<script>
+"use strict";
+/* [offset from Start in seconds or null, timing, command, type, note] */
+const SEQ = [
+ ["sec","1 · OPENING"],
+ [-690,"−11:30","ATHLETES TO THE LINE"],
+ [null,"","Presentation of the Finalists, Jury Member-in-Charge and CRO","ann"],
+ [-485,"","TAKE YOUR POSITIONS","","Finalists 1–4 → Firing Points · 5–8 → Ammunition Areas"],
+ ["sec","2 · SIGHTING · FINALISTS 1–4"],
+ [-475,"10 sec","PREPARATION BEGINS NOW  (1 min)"],
+ [-415,"1 min","END OF PREPARATION"],
+ [-400,"15 sec","FOR THE SIGHTING SERIES … LOAD"],
+ [-370,"30 sec","#1, #3 … READY"],
+ [-350,"20 sec","ATTENTION"],
+ [-330,"20 sec","#2, #4 … READY"],
+ [-310,"20 sec","ATTENTION"],
+ ["sec","3 · SIGHTING · FINALISTS 5–8"],
+ [-280,"30 sec","FOR FINALISTS NO. 5, 6, 7 AND 8: TAKE YOUR POSITIONS"],
+ [-260,"20 sec","PREPARATION BEGINS NOW  (1 min)"],
+ [-200,"1 min","END OF PREPARATION"],
+ [-185,"15 sec","FOR THE SIGHTING SERIES … LOAD"],
+ [-155,"30 sec","#5, #7 … READY"],
+ [-135,"20 sec","ATTENTION"],
+ [-115,"20 sec","#6, #8 … READY"],
+ [-95,"20 sec","ATTENTION","","No score announcement after sighting"],
+ [-75,"20 sec","Announcer: brief explanation of the Final","ann"],
+ ["sec","4 · MATCH · FIRST 3 SERIES (PAIRS)"],
+ [-20,"−0:20","#1, #3 … READY"],
+ [0,"20 sec","ATTENTION","","FINAL START"],
+ [null,"HITS","#1 … HITS, #3 … HITS","hit"],
+ [null,"20 sec","#2, #4 … READY","","After EST ready"],
+ [null,"20 sec","ATTENTION"],
+ [null,"HITS","#2 … HITS, #4 … HITS","hit"],
+ [null,"20 sec","#5, #7 … READY"],
+ [null,"20 sec","ATTENTION"],
+ [null,"HITS","#5 … HITS, #7 … HITS","hit"],
+ [null,"20 sec","#6, #8 … READY"],
+ [null,"20 sec","ATTENTION"],
+ [null,"HITS","#6 … HITS, #8 … HITS","hit"],
+ [null,"15–20 s","Announcer: comments on the ranking","ann","Repeat the same sequence for series 2 and 3"],
+ [null,"","After 3 series: 8th & 7th eliminated — then call 1 by 1","note"],
+ ["sec","5 · SERIES 4 – 8 (ONE BY ONE, START No. ORDER)"],
+ [null,"20 sec","(Family Name) … READY","","After EST ready"],
+ [null,"20 sec","ATTENTION"],
+ [null,"HITS","(Family Name) … HITS","hit"],
+ [null,"15–20 s","Announcer: congratulates the eliminated Finalist, comments","ann"],
+ [null,"","After 4 → 6th · after 5 → 5th · after 6 → 4th · after 7 → BRONZE · after 8 → SILVER & GOLD","note"],
+ ["sec","6 · COMPLETION"],
+ [null,"","STOP … UNLOAD"],
+ [null,"","RESULTS ARE FINAL","","Only if no ties and no protests – after checking with the Control Room"],
+ ["sec","TIE-BREAK","tie"],
+ [null,"","8th – 5th: decided by Final Start No. (lower No. ranks higher) – no shoot-off","tie"],
+ [null,"10 sec","Announcer: max. 10 sec comments on the tie","ann"],
+ [null,"","There is a tie for the lowest ranking Finalist to be eliminated.","tie","4th place & medals – one by one, lowest Start No. first"],
+ [null,"20 sec","(Family Name) … READY … ATTENTION","tie"],
+ [null,"HITS","(Family Name) … HITS","tie","Repeat until the tie is broken"]
+];
+
+const $=id=>document.getElementById(id);
+const p2=n=>String(n).padStart(2,"0");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let START="14:00";
+try{ START=localStorage.getItem("rfpm_cro_start")||START; }catch(e){}
+function startMs(){ const d=new Date(); const [h,m]=START.split(":"); d.setHours(+h||0,+m||0,0,0); return d.getTime(); }
+function hms(ms){ const d=new Date(ms); return p2(d.getHours())+":"+p2(d.getMinutes())+":"+p2(d.getSeconds()); }
+function hm(ms){ const d=new Date(ms); return p2(d.getHours())+":"+p2(d.getMinutes()); }
+
+function render(){
+  const s=startMs(); let h="";
+  SEQ.forEach((r,i)=>{
+    if(r[0]==="sec"){ h+='<div class="sec '+(r[2]||"")+'">'+esc(r[1])+'</div>'; return; }
+    const [off,t,c,ty,n]=r;
+    h+='<div class="r '+(ty||"")+'" id="r'+i+'"><div class="clk">'+(off!=null?hms(s+off*1000):"")+'</div><div class="t">'+esc(t)+'</div><div><div class="c">'+esc(c)+'</div>'+(n?'<div class="n">'+esc(n)+'</div>':'')+'</div></div>';
+  });
+  $("list").innerHTML=h;
+  $("iRep").textContent=hm(s-1800000); $("iEq").textContent=hm(s-1200000);
+  lastNow=-1; markNow();
+}
+
+/* highlight the scheduled row by the clock (opening & sighting only) */
+let lastNow=-1, userScroll=0;
+$("main").addEventListener("scroll",()=>{ userScroll=Date.now(); },{passive:true});
+function markNow(){
+  const now=Date.now(), s=startMs(); let cur=-1;
+  SEQ.forEach((r,i)=>{ if(typeof r[0]==="number" && s+r[0]*1000<=now+500) cur=i; });
+  if(cur===lastNow) return;
+  SEQ.forEach((r,i)=>{ const el=$("r"+i); if(!el||typeof r[0]!=="number") return;
+    el.classList.toggle("now",i===cur); el.classList.toggle("past",i<cur && cur!==SEQ.length); });
+  if(cur>=0 && Date.now()-userScroll>8000){ const el=$("r"+cur); if(el) el.scrollIntoView({block:"center",behavior:"smooth"}); }
+  lastNow=cur;
+}
+
+/* one-tap timer */
+let dur=20, t0=0, running=false, WL=null;
+async function wake(){ try{ if("wakeLock" in navigator && !WL){ WL=await navigator.wakeLock.request("screen"); WL.addEventListener("release",()=>{WL=null;}); } }catch(e){} }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") wake(); });
+
+function tap(){ wake(); t0=Date.now(); running=true; draw(); }
+function stopT(){ running=false; draw(); }
+document.querySelectorAll(".side [data-s]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".side [data-s]").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  dur=+b.dataset.s; running=false; draw(); }));
+
+function draw(){
+  const tapEl=$("tap"), num=$("num"), lbl=$("lbl");
+  if(!running){ tapEl.className=""; num.textContent=dur>=60?"1:00":dur; lbl.innerHTML="<b>TAP to start "+(dur>=60?"1 min":dur+" s")+"</b>"+"tap here or press SPACE"; return; }
+  const rem=dur*1000-(Date.now()-t0);
+  if(rem>0){
+    const s=Math.ceil(rem/1000);
+    num.textContent = s>=60 ? Math.floor(s/60)+":"+p2(s%60) : s;
+    tapEl.className = rem<=3000 ? "run warn" : "run";
+    lbl.innerHTML="<b>"+(dur===20?"→ ATTENTION":"running")+"</b>tap or SPACE to restart "+(dur>=60?"1 min":dur+" s");
+    
+  } else {
+    const o=Math.floor(-rem/1000);
+    num.textContent="+"+o; tapEl.className="over";
+    lbl.innerHTML="<b>"+(dur===20?"ATTENTION!":"TIME")+"</b>tap or SPACE to restart";
+    
+  }
+}
+
+/* clock */
+function clock(){
+  const now=Date.now(), d=startMs()-now, s=Math.floor(Math.abs(d)/1000);
+  $("clk").textContent=hms(now);
+  const t=(s>=3600?Math.floor(s/3600)+":"+p2(Math.floor(s/60)%60):p2(Math.floor(s/60)))+":"+p2(s%60);
+  $("tm").textContent=(d>=0?"T −":"T +")+t; $("tm").classList.toggle("after",d<0);
+  markNow();
+}
+
+/* keyboard: SPACE = tap, S = stop */
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT") return;
+  if(e.code==="Space"){ e.preventDefault(); tap(); }
+  else if(e.key==="s"||e.key==="S"||e.key==="Escape"){ stopT(); }
+});
+document.addEventListener("click",e=>{ const b=e.target.closest("button"); if(b) b.blur(); });
+
+$("st").value=START;
+$("st").addEventListener("change",e=>{ if(e.target.value){ START=e.target.value; try{localStorage.setItem("rfpm_cro_start",START);}catch(x){} render(); } });
+render(); draw(); clock();
+setInterval(()=>{ if(running) draw(); },100);
+setInterval(clock,500);
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+</script>
+</body>
+</html>

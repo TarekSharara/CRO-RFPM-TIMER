@@ -1,0 +1,17 @@
+{
+  "name": "RFPM Final – CRO Timer",
+  "short_name": "RFPM CRO",
+  "description": "25m Rapid Fire Pistol Men Final – Chief Range Officer command timer (ISSF 2026)",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f8",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "cro-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "cro-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
